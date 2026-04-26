@@ -39,6 +39,12 @@ on:
 
 jobs:
   downloader:
+    if: |
+      github.event_name == 'workflow_dispatch' || 
+      (github.event_name == 'push' && 
+       github.actor != 'github-actions[bot]' &&
+       (startsWith(github.event.head_commit.message, 'download:') || 
+        startsWith(github.event.head_commit.message, 'download-zip:')))
     runs-on: ubuntu-latest
     timeout-minutes: 360
 
@@ -58,17 +64,13 @@ jobs:
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
 
-          if echo "$COMMIT_MSG" | grep -qE "download(-zip)?:"; then
-            echo "$COMMIT_MSG" | grep -oP "(?<=download(-zip)?: ).*" | tr ' ' '\n' > urls.txt
-            echo "URLS_FOUND=true" >> $GITHUB_ENV
+          echo "$COMMIT_MSG" | grep -oP "(?<=download(-zip)?: ).*" | tr ' ' '\n' > urls.txt
+          echo "URLS_FOUND=true" >> $GITHUB_ENV
 
-            if echo "$COMMIT_MSG" | grep -q "download-zip:"; then
-              echo "ARCHIVE_FORMAT=zip" >> $GITHUB_ENV
-            else
-              echo "ARCHIVE_FORMAT=none" >> $GITHUB_ENV
-            fi
+          if echo "$COMMIT_MSG" | grep -q "download-zip:"; then
+            echo "ARCHIVE_FORMAT=zip" >> $GITHUB_ENV
           else
-            echo "URLS_FOUND=false" >> $GITHUB_ENV
+            echo "ARCHIVE_FORMAT=none" >> $GITHUB_ENV
           fi
 
       - name: Prepare manual URLs
@@ -80,13 +82,6 @@ jobs:
           echo "SPLIT_SIZE=${{ github.event.inputs.split_size }}" >> $GITHUB_ENV
           echo "PASSWORD=${{ github.event.inputs.password }}" >> $GITHUB_ENV
           echo "CONNECTIONS=${{ github.event.inputs.connections }}" >> $GITHUB_ENV
-
-      - name: Stop if no URLs
-        run: |
-          if [ "$URLS_FOUND" != "true" ] || [ ! -s urls.txt ]; then
-            echo "No URLs found."
-            exit 0
-          fi
 
       - name: Prepare folders
         run: |
