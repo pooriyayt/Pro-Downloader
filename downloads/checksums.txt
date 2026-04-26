@@ -1,2 +1,0 @@
-feffb8e5cb5ac47f793666636d496ef3e975be82c84c4da5d20e6aa8fa4eb806  ./other/node-v24.15.0-x64.msi
-43f8f5d41d509f91d0f04ecb11cfdeaa8159892801f7c1240cc7c2aba5bdeda5  ./checksums.txt
