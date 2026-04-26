@@ -1,0 +1,196 @@
+name: Pro Downloader
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: 'URLs to download (one per line)'
+        required: true
+        type: string
+      archive_format:
+        description: 'Archive format (7z/zip/tar.gz/none)'
+        required: false
+        default: '7z'
+        type: choice
+        options:
+          - '7z'
+          - 'zip'
+          - 'tar.gz'
+          - 'none'
+      split_size:
+        description: 'Split size (e.g., 90m, 1g)'
+        required: false
+        default: '90m'
+        type: string
+      password:
+        description: 'Archive password (optional)'
+        required: false
+        type: string
+      connections:
+        description: 'Connections per download'
+        required: false
+        default: '16'
+        type: string
+
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  downloader:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y aria2 p7zip-full zip unzip jq file curl wget
+
+      - name: Extract URLs from commit message
+        if: github.event_name == 'push'
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+
+          if echo "$COMMIT_MSG" | grep -qE "download(-zip)?:"; then
+            echo "$COMMIT_MSG" | grep -oP "(?<=download(-zip)?: ).*" | tr ' ' '\n' > urls.txt
+            echo "URLS_FOUND=true" >> $GITHUB_ENV
+
+            if echo "$COMMIT_MSG" | grep -q "download-zip:"; then
+              echo "ARCHIVE_FORMAT=zip" >> $GITHUB_ENV
+            else
+              echo "ARCHIVE_FORMAT=none" >> $GITHUB_ENV
+            fi
+          else
+            echo "URLS_FOUND=false" >> $GITHUB_ENV
+          fi
+
+      - name: Prepare manual URLs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "${{ github.event.inputs.urls }}" > urls.txt
+          echo "URLS_FOUND=true" >> $GITHUB_ENV
+          echo "ARCHIVE_FORMAT=${{ github.event.inputs.archive_format }}" >> $GITHUB_ENV
+          echo "SPLIT_SIZE=${{ github.event.inputs.split_size }}" >> $GITHUB_ENV
+          echo "PASSWORD=${{ github.event.inputs.password }}" >> $GITHUB_ENV
+          echo "CONNECTIONS=${{ github.event.inputs.connections }}" >> $GITHUB_ENV
+
+      - name: Stop if no URLs
+        run: |
+          if [ "$URLS_FOUND" != "true" ] || [ ! -s urls.txt ]; then
+            echo "No URLs found."
+            exit 0
+          fi
+
+      - name: Prepare folders
+        run: |
+          mkdir -p downloads/{video,audio,image,document,archive,other}
+          mkdir -p temp
+
+      - name: Download files with aria2
+        run: |
+          CONNECTIONS="${CONNECTIONS:-16}"
+
+          while read -r url; do
+            [ -z "$url" ] && continue
+
+            aria2c \
+              --dir=temp \
+              --max-connection-per-server=$CONNECTIONS \
+              --split=$CONNECTIONS \
+              --min-split-size=1M \
+              --continue=true \
+              --max-tries=5 \
+              --retry-wait=3 \
+              --timeout=60 \
+              "$url" || echo "Download failed: $url"
+
+          done < urls.txt
+
+      - name: Categorize files
+        run: |
+          for f in temp/*; do
+            [ -f "$f" ] || continue
+
+            MIME=$(file --mime-type -b "$f")
+
+            case "$MIME" in
+              video/*) DEST="video" ;;
+              audio/*) DEST="audio" ;;
+              image/*) DEST="image" ;;
+              application/pdf|text/*|application/msword|application/vnd*) DEST="document" ;;
+              application/zip|application/x-rar|application/x-7z*) DEST="archive" ;;
+              *) DEST="other" ;;
+            esac
+
+            mv "$f" "downloads/$DEST/"
+          done
+
+      - name: Generate checksums
+        run: |
+          cd downloads
+          find . -type f -exec sha256sum {} \; > checksums.txt
+
+      - name: Generate metadata
+        run: |
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          jq -n \
+            --arg date "$DATE" \
+            --argjson files "$(find downloads -type f -printf '%p\n' | jq -R . | jq -s .)" \
+            '{download_date:$date,files:$files}' \
+            > downloads/metadata.json
+
+      - name: Compress downloads
+        if: env.ARCHIVE_FORMAT != 'none'
+        run: |
+          FORMAT="${ARCHIVE_FORMAT:-7z}"
+          SPLIT="${SPLIT_SIZE:-90m}"
+          PASS="$PASSWORD"
+
+          mkdir -p output
+
+          if [ "$FORMAT" = "7z" ]; then
+            if [ -n "$PASS" ]; then
+              7z a -t7z -v$SPLIT -p"$PASS" output/archive.7z downloads/*
+            else
+              7z a -t7z -v$SPLIT output/archive.7z downloads/*
+            fi
+
+          elif [ "$FORMAT" = "zip" ]; then
+            if [ -n "$PASS" ]; then
+              zip -r -P "$PASS" output/archive.zip downloads
+            else
+              zip -r output/archive.zip downloads
+            fi
+
+          elif [ "$FORMAT" = "tar.gz" ]; then
+            tar -czf output/archive.tar.gz downloads
+          fi
+
+      - name: Move results
+        run: |
+          if [ -d output ]; then
+            mv output/* .
+          fi
+
+      - name: Commit files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add .
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+
+          git commit -m "Automated downloads [skip ci]"
+          git push
