@@ -6,7 +6,7 @@
 
 [![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?logo=github-actions&logoColor=white)](https://github.com/features/actions)
 [![aria2](https://img.shields.io/badge/Downloader-aria2-orange)](https://aria2.github.io/)
-[![License](https://img.shields.io/badge/License-MIT-green)]
+![License](https://img.shields.io/badge/License-MIT-green)
 
 <b>زبان:</b>  
 🇮🇷 فارسی | <a href="#english">English</a>
