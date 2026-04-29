@@ -15,6 +15,60 @@
 
 ---
 
+# ⚠️ سلب مسئولیت (Disclaimer)
+
+🚨 این پروژه صرفاً یک ابزار فنی برای مدیریت و خودکارسازی دانلود فایل‌ها با استفاده از GitHub Actions می‌باشد.
+
+استفاده از این ابزار کاملاً بر عهده کاربر است.
+
+## ❗ مسئولیت کاربر
+
+با استفاده از این پروژه شما تأیید می‌کنید که:
+
+- ✅ فقط فایل‌هایی را دانلود می‌کنید که اجازه قانونی دانلود و استفاده از آن‌ها را دارید.
+- ✅ مالک محتوا هستید یا مجوز رسمی از صاحب اثر دارید.
+- ✅ از این ابزار برای نقض کپی‌رایت، قوانین محلی یا بین‌المللی استفاده نخواهید کرد.
+- ✅ از این ابزار برای دانلود محتوای غیرقانونی، مخرب یا ناقض قوانین GitHub استفاده نخواهید کرد.
+- ✅ از این پروژه برای سوءاستفاده از منابع GitHub Actions یا ایجاد بار غیرعادی روی سرورها استفاده نخواهید کرد.
+
+## 🚫 موارد استفاده ممنوع
+
+استفاده از این پروژه برای موارد زیر اکیداً ممنوع است:
+
+- دانلود یا توزیع محتوای دارای حق نشر بدون مجوز
+- دور زدن سیستم‌های پرداخت، DRM یا محدودیت‌های دسترسی
+- میزبانی، ذخیره یا توزیع محتوای غیرقانونی
+- استفاده به عنوان CDN، فایل هاستینگ عمومی یا سیستم میرور عمومی
+- هرگونه فعالیتی که ناقض GitHub Terms of Service باشد
+
+## 📜 انطباق با قوانین GitHub
+
+این پروژه به‌گونه‌ای طراحی شده که صرفاً یک ابزار عمومی اتوماسیون باشد و هیچ سرویس میزبانی فایل عمومی ارائه نمی‌دهد.
+
+کاربران موظف هستند:
+
+- شرایط استفاده GitHub (GitHub Terms of Service)
+- سیاست استفاده قابل قبول (Acceptable Use Policy)
+- قوانین کپی‌رایت (DMCA)
+
+را مطالعه و رعایت نمایند.
+
+## ⚖️ محدودیت مسئولیت
+
+نویسنده این پروژه:
+
+- هیچ مسئولیتی در قبال نحوه استفاده کاربران ندارد.
+- مسئولیتی در قبال محتوای دانلودشده ندارد.
+- هیچ‌گونه ضمانتی در مورد قانونی بودن استفاده کاربران ارائه نمی‌دهد.
+
+در صورت سوءاستفاده، مسئولیت کامل بر عهده کاربر نهایی خواهد بود.
+
+---
+
+با استفاده از این پروژه، شما تمامی شرایط فوق را می‌پذیرید.
+
+
+
 <a name="persian"></a>
 
 # 🇮🇷 راهنمای فارسی
@@ -161,6 +215,57 @@ Connections: 16
 MIT License — استفاده و تغییر آزاد است.
 
 ---
+
+# ⚠️ Disclaimer
+
+🚨 This project is a technical automation tool built on GitHub Actions for downloading and organizing files.
+
+Use of this tool is entirely at your own risk.
+
+## ❗ User Responsibility
+
+By using this project, you agree that:
+
+- ✅ You will only download content that you are legally permitted to access and use.
+- ✅ You own the content or have proper authorization from the copyright holder.
+- ✅ You will not use this tool to violate copyright laws or any local/international regulations.
+- ✅ You will not use this project to download illegal, harmful, or policy‑violating content.
+- ✅ You will not abuse GitHub Actions resources or generate excessive or abnormal traffic.
+
+## 🚫 Prohibited Use
+
+This project must NOT be used for:
+
+- Downloading or distributing copyrighted material without permission
+- Circumventing paywalls, DRM, or access control systems
+- Hosting, storing, or distributing illegal content
+- Operating as a public file hosting service, CDN, or mirror system
+- Any activity that violates GitHub Terms of Service
+
+## 📜 Compliance With GitHub Policies
+
+This project is designed strictly as a generic automation workflow and does not provide any public hosting service.
+
+Users are responsible for complying with:
+
+- GitHub Terms of Service
+- GitHub Acceptable Use Policy
+- Copyright laws (including DMCA)
+
+## ⚖️ Limitation of Liability
+
+The author of this project:
+
+- Is not responsible for how users utilize this tool
+- Has no control over downloaded content
+- Provides no guarantee regarding legal compliance of user activities
+
+Any misuse is solely the responsibility of the end user.
+
+---
+
+By using this project, you acknowledge and accept all terms above.
+
 
 <a name="english"></a>
 
