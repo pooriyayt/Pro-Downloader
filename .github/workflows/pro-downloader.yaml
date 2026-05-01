@@ -20,7 +20,7 @@ on:
       split_size:
         description: 'Split size (e.g., 90m, 1g)'
         required: false
-        default: '90m'
+        default: '50m'
         type: string
       password:
         description: 'Archive password (optional)'
@@ -153,10 +153,11 @@ jobs:
 
           if [ "$FORMAT" = "7z" ]; then
             if [ -n "$PASS" ]; then
-              7z a -t7z -v$SPLIT -p"$PASS" output/archive.7z downloads/*
+              7z a -t7z output/archive.7z downloads/* -p"$PASS"
             else
-              7z a -t7z -v$SPLIT output/archive.7z downloads/*
+              7z a -t7z output/archive.7z downloads/*
             fi
+            ARCHIVE="output/archive.7z"
 
           elif [ "$FORMAT" = "zip" ]; then
             if [ -n "$PASS" ]; then
@@ -164,10 +165,19 @@ jobs:
             else
               zip -r output/archive.zip downloads
             fi
+            ARCHIVE="output/archive.zip"
 
           elif [ "$FORMAT" = "tar.gz" ]; then
             tar -czf output/archive.tar.gz downloads
+            ARCHIVE="output/archive.tar.gz"
           fi
+
+          # Split archive if size provided
+          if [ -n "$SPLIT" ]; then
+            split -b $SPLIT -d "$ARCHIVE" "$ARCHIVE.part."
+            rm "$ARCHIVE"
+          fi
+
 
       - name: Move results
         run: |
@@ -180,8 +190,11 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          git add .
+          # حذف فایل‌های بزرگ از commit (فقط checksum و metadata نگه دار)
+          git add downloads/checksums.txt downloads/metadata.json
+          git add archive.7z.part.* || true
 
+          # بررسی اگر فایلی برای commit هست
           if git diff --cached --quiet; then
             echo "Nothing to commit"
             exit 0
